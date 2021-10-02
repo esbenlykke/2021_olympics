@@ -1,0 +1,48 @@
+---
+title: "2021 olympics"
+author: "Esben Lykke Skovgaard"
+date: "25/9/2021"
+output: prettydoc::html_pretty:
+  theme: architect
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  cache = TRUE,
+  warning = FALSE
+)
+
+library(pacman)
+
+p_load(
+  tidyverse,
+  here,
+  janitor,
+  readxl
+)
+
+theme_set(theme_minimal())
+```
+
+
+Import data
+```{r}
+medals <- read_excel(here("2021_olympics", "data", "medals.xlsx")) %>% 
+  clean_names()
+
+```
+
+Medals awarded per nation
+```{r}
+medals %>%
+  mutate(
+    team_noc = fct_reorder(team_noc, total)
+  ) %>%
+  ggplot(aes(team_noc, total)) +
+  geom_col() +
+  coord_flip()
+```
