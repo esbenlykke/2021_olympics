@@ -2,7 +2,8 @@
 title: "2021 olympics"
 author: "Esben Lykke Skovgaard"
 date: "25/9/2021"
-output: prettydoc::html_pretty:
+output: 
+  prettydoc::html_pretty:
   theme: architect
 editor_options:
   chunk_output_type: console
@@ -72,14 +73,14 @@ tokyoo_2021 <-
 ```
 
 Medals awarded per nation
-```{r}
-medals %>%
-  mutate(
-    team_noc = fct_reorder(team_noc, total)
-  ) %>%
-  slice_max(team_noc, n = 15) %>% 
-  ggplot(aes(team_noc, total)) +
-  geom_segment(aes(x = 0, xend = total, yend = total, color = if_else(team_noc == "Japan", "orange", "grey50"))) + #TODO fix plot
-  geom_point(aes(team_noc, total)) +
-  coord_flip()
-```
+# ```{r}
+# medals %>%
+#   mutate(
+#     team_noc = fct_reorder(team_noc, total)
+#   ) %>%
+#   slice_max(team_noc, n = 15) %>% 
+#   ggplot(aes(team_noc, total)) +
+#   geom_segment(aes(x = 0, xend = total, yend = total, color = if_else(team_noc == "Japan", "orange", "grey50"))) + #TODO fix plot
+#   geom_point(aes(team_noc, total)) +
+#   coord_flip()
+# ```
