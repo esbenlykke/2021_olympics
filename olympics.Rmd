@@ -22,7 +22,9 @@ p_load(
   tidyverse,
   here,
   janitor,
-  readxl
+  readxl,
+  hrbrthemes,
+  ggthemes
 )
 
 theme_set(theme_minimal())
@@ -32,7 +34,9 @@ theme_set(theme_minimal())
 Import data
 ```{r}
 medals <- read_excel(here("data", "medals.xlsx")) %>% 
-  clean_names()
+  clean_names() %>% 
+  mutate(team_noc = factor(team_noc),
+         across(where(is.character), as.numeric))
 
 athletes <- 
   read_excel(here("data", "athletes.xlsx")) %>% 
@@ -73,7 +77,9 @@ medals %>%
   mutate(
     team_noc = fct_reorder(team_noc, total)
   ) %>%
+  slice_max(team_noc, n = 15) %>% 
   ggplot(aes(team_noc, total)) +
-  geom_col() +
+  geom_segment(aes(x = 0, xend = total, yend = total, color = if_else(team_noc == "Japan", "orange", "grey50"))) + #TODO fix plot
+  geom_point(aes(team_noc, total)) +
   coord_flip()
 ```
