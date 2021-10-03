@@ -74,9 +74,11 @@ medals %>%
   mutate(
     team_noc = fct_reorder(team_noc, total)
   ) %>%
-  slice_max(team_noc, n = 15) %>%
-  ggplot(aes(team_noc, total)) +
-  geom_segment(aes(x = 0, xend = total, yend = total, color = if_else(team_noc == "Japan", "orange", "grey50"))) + #TODO fix plot
-  geom_point(aes(team_noc, total)) +
-  coord_flip()
+  slice_max(teaxm_noc, n = 15) %>%
+  ggplot(aes(total, team_noc)) +
+  geom_segment(aes(x = 0, xend = total, yend = team_noc),
+               color = if_else(medals$team_noc %in% c("Japan", "Denmark"), "orange", "grey50"),
+               size = if_else(medals$team_noc %in% c("Japan", "Denmark"), 1.3, 0.7) #TODO get geom_segment to work with slice_sample
+  ) +
+  geom_point(aes(total)) 
 ```
