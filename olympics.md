@@ -1,21 +1,11 @@
----
-title: "2021 olympics"
-author: "Esben Lykke Skovgaard"
-date: "25/9/2021"
-output: 
-  prettydoc::html_pretty:
-    keep_md: true
-  theme: architect
-editor_options:
-  chunk_output_type: console
----
-
-
-
+2021 olympics
+================
+Esben Lykke Skovgaard
+25/9/2021
 
 Import data
 
-```r
+``` r
 medals <- read_excel(here("data", "medals.xlsx")) %>% 
   clean_names() %>% 
   mutate(team_noc = factor(team_noc),
@@ -54,15 +44,5 @@ tokyoo_2021 <-
   clean_names()
 ```
 
-Medals awarded per nation
-# ```{r}
-# medals %>%
-#   mutate(
-#     team_noc = fct_reorder(team_noc, total)
-#   ) %>%
-#   slice_max(team_noc, n = 15) %>% 
-#   ggplot(aes(team_noc, total)) +
-#   geom_segment(aes(x = 0, xend = total, yend = total, color = if_else(team_noc == "Japan", "orange", "grey50"))) + #TODO fix plot
-#   geom_point(aes(team_noc, total)) +
-#   coord_flip()
-# ```
+Medals awarded per nation #
+`{r} # medals %>% #   mutate( #     team_noc = fct_reorder(team_noc, total) #   ) %>% #   slice_max(team_noc, n = 15) %>%  #   ggplot(aes(team_noc, total)) + #   geom_segment(aes(x = 0, xend = total, yend = total, color = if_else(team_noc == "Japan", "orange", "grey50"))) + #TODO fix plot #   geom_point(aes(team_noc, total)) + #   coord_flip() #`

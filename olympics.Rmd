@@ -2,12 +2,7 @@
 title: "2021 olympics"
 author: "Esben Lykke Skovgaard"
 date: "25/9/2021"
-output: 
-  prettydoc::html_pretty:
-    keep_md: true
-  theme: architect
-editor_options:
-  chunk_output_type: console
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
