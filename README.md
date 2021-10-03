@@ -1,2 +1,2 @@
 # 2021_olympics
-Kaggle dataset exploration
+2021 olympics dataset exploration
