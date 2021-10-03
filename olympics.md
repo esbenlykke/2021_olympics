@@ -10,31 +10,12 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE,
-  message = FALSE,
-  cache = TRUE,
-  warning = FALSE
-)
 
-library(pacman)
-
-p_load(
-  tidyverse,
-  here,
-  janitor,
-  readxl,
-  hrbrthemes,
-  ggthemes
-)
-
-theme_set(theme_minimal())
-```
 
 
 Import data
-```{r}
+
+```r
 medals <- read_excel(here("data", "medals.xlsx")) %>% 
   clean_names() %>% 
   mutate(team_noc = factor(team_noc),
