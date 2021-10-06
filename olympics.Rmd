@@ -30,41 +30,41 @@ theme_set(theme_minimal())
 
 Import data
 ```{r}
-medals <- read_excel(here("data", "medals.xlsx")) %>% 
+medals <- read_excel(here("2021_olympics", "data", "medals.xlsx")) %>% 
   clean_names() %>% 
   mutate(team_noc = factor(team_noc),
          across(where(is.character), as.numeric))
 
 athletes <- 
-  read_excel(here("data", "athletes.xlsx")) %>% 
+  read_excel(here("2021_olympics", "data", "athletes.xlsx")) %>% 
   clean_names()
 
 coaches <- 
-  read_excel(here("data", "coaches.xlsx")) %>% 
+  read_excel(here("2021_olympics", "data", "coaches.xlsx")) %>% 
   clean_names()
 
 gender <- 
-  read_excel(here("data", "entriesgender.xlsx")) %>% 
+  read_excel(here("2021_olympics", "data", "entriesgender.xlsx")) %>% 
   clean_names()
 
 teams <- 
-  read_excel(here("data", "teams.xlsx")) %>% 
+  read_excel(here("2021_olympics", "data", "teams.xlsx")) %>% 
   clean_names()
 
 pop_country <- 
-  read_csv(here("data", "population_by_country_2020.csv")) %>% 
+  read_csv(here("2021_olympics", "data", "population_by_country_2020.csv")) %>% 
   clean_names()
 
 athlete_events <- 
-  read_csv(here("data", "athlete_events.csv")) %>% 
+  read_csv(here("2021_olympics", "data", "athlete_events.csv")) %>% 
   clean_names()
 
 noc_regions <- 
-  read_csv(here("data", "noc_regions.csv")) %>% 
+  read_csv(here("2021_olympics", "data", "noc_regions.csv")) %>% 
   clean_names()
 
 tokyoo_2021 <- 
-  read_csv(here("data", "Tokyo 2021 dataset.csv")) %>% 
+  read_csv(here("2021_olympics", "data", "Tokyo 2021 dataset.csv")) %>% 
   clean_names()
 ```
 
@@ -78,7 +78,6 @@ medals %>%
   ggplot(aes(total, team_noc)) +
   geom_segment(aes(x = 0, xend = total, yend = team_noc),
                color = if_else(medals$team_noc %in% c("Japan", "Denmark"), "orange", "grey50"),
-               size = if_else(medals$team_noc %in% c("Japan", "Denmark"), 1.3, 0.7) #TODO get geom_segment to work with slice_sample
-  ) +
+               size = if_else(medals$team_noc %in% c("Japan", "Denmark"), 1.3, 0.7)) + #TODO get geom_segment to work with slice_sample
   geom_point(aes(total)) 
 ```
