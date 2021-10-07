@@ -24,60 +24,84 @@ p_load(
   ggthemes
 )
 
-theme_set(theme_minimal())
+theme_michau <- theme(legend.position = "bottom", legend.direction = "horizontal", axis.text = element_text(size = 17.8), 
+plot.caption = element_text(color = "gray55", face = "bold", size = 12), legend.text = element_text(size = 17.3), 
+axis.title = element_text(size = 17.8, face = "bold", color = "gray25"), legend.title = element_text(size = 17.3), 
+axis.line = element_line(size = 0.45), plot.title = element_text(size = 22.1), plot.subtitle = element_text(size = 17.8), 
+strip.text = element_text(size = 17.3, face = "bold"))
 ```
 
 
 Import data
 ```{r}
-medals <- read_excel(here("2021_olympics", "data", "medals.xlsx")) %>% 
+medals <- read_excel(here("data", "medals.xlsx")) %>% 
   clean_names() %>% 
   mutate(team_noc = factor(team_noc),
          across(where(is.character), as.numeric))
 
 athletes <- 
-  read_excel(here("2021_olympics", "data", "athletes.xlsx")) %>% 
+  read_excel(here("data", "athletes.xlsx")) %>% 
   clean_names()
 
 coaches <- 
-  read_excel(here("2021_olympics", "data", "coaches.xlsx")) %>% 
+  read_excel(here("data", "coaches.xlsx")) %>% 
   clean_names()
 
 gender <- 
-  read_excel(here("2021_olympics", "data", "entriesgender.xlsx")) %>% 
+  read_excel(here("data", "entriesgender.xlsx")) %>% 
   clean_names()
 
 teams <- 
-  read_excel(here("2021_olympics", "data", "teams.xlsx")) %>% 
+  read_excel(here("data", "teams.xlsx")) %>% 
   clean_names()
 
 pop_country <- 
-  read_csv(here("2021_olympics", "data", "population_by_country_2020.csv")) %>% 
+  read_csv(here("data", "population_by_country_2020.csv")) %>% 
   clean_names()
 
 athlete_events <- 
-  read_csv(here("2021_olympics", "data", "athlete_events.csv")) %>% 
+  read_csv(here("data", "athlete_events.csv")) %>% 
   clean_names()
 
 noc_regions <- 
-  read_csv(here("2021_olympics", "data", "noc_regions.csv")) %>% 
+  read_csv(here("data", "noc_regions.csv")) %>% 
   clean_names()
 
 tokyoo_2021 <- 
-  read_csv(here("2021_olympics", "data", "Tokyo 2021 dataset.csv")) %>% 
+  read_csv(here("data", "Tokyo 2021 dataset.csv")) %>% 
   clean_names()
 ```
 
 Medals awarded per nation
 ```{r}
-medals %>%
+medals_30 <- 
+  medals%>%
   mutate(
     team_noc = fct_reorder(team_noc, total)
   ) %>%
-  slice_max(teaxm_noc, n = 15) %>%
-  ggplot(aes(total, team_noc)) +
-  geom_segment(aes(x = 0, xend = total, yend = team_noc),
-               color = if_else(medals$team_noc %in% c("Japan", "Denmark"), "orange", "grey50"),
-               size = if_else(medals$team_noc %in% c("Japan", "Denmark"), 1.3, 0.7)) + #TODO get geom_segment to work with slice_sample
-  geom_point(aes(total)) 
+  slice_max(team_noc, n = 30)
+
+medals_30 %>% 
+  ggplot(aes(team_noc, total)) +
+  geom_segment(aes(x = team_noc, xend = team_noc, y = 0, yend = total)) +
+  geom_point(aes(team_noc, total),
+             color = if_else(medals_30$team_noc == "Denmark", "red", "grey50"),
+             size = if_else(medals_30$team_noc == "Denmark", 10, 5)) +
+  geom_text(aes(team_noc, total, label = if_else(team_noc == "Denmark", total, NULL)), color = "white") +
+  coord_flip() +
+  labs(y = NULL,
+       x = NULL,
+       title = "Toal olympic medals by country: Tokyo 2021",
+       subtitle = "Denmark is highlighted") +
+  theme_fivethirtyeight() +
+  theme_michau
 ```
+
+
+
+
+
+
+
+
+
