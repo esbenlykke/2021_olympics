@@ -24,7 +24,7 @@ p_load(
   ggthemes
 )
 
-theme_michau <- theme(legend.position = "bottom", legend.direction = "horizontal", axis.text = element_text(size = 17.8), 
+theme_custom <- theme(legend.position = "bottom", legend.direction = "horizontal", axis.text = element_text(size = 17.8), 
 plot.caption = element_text(color = "gray55", face = "bold", size = 12), legend.text = element_text(size = 17.3), 
 axis.title = element_text(size = 17.8, face = "bold", color = "gray25"), legend.title = element_text(size = 17.3), 
 axis.line = element_line(size = 0.45), plot.title = element_text(size = 22.1), plot.subtitle = element_text(size = 17.8), 
@@ -94,7 +94,8 @@ medals_30 %>%
        title = "Toal olympic medals by country: Tokyo 2021",
        subtitle = "Denmark is highlighted") +
   theme_fivethirtyeight() +
-  theme_michau
+  theme_custom 
+  
 ```
 
 
