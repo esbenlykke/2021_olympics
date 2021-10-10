@@ -2,7 +2,9 @@
 title: "2021 olympics"
 author: "Esben Lykke Skovgaard"
 date: "25/9/2021"
-output: github_document
+output:
+    html_document:
+      theme: cosmo
 ---
 
 ```{r setup, include=FALSE}
@@ -21,88 +23,105 @@ p_load(
   janitor,
   readxl,
   hrbrthemes,
-  ggthemes
+  ggthemes,
+  DT
 )
 
-theme_custom <- theme(legend.position = "bottom", legend.direction = "horizontal", axis.text = element_text(size = 17.8), 
-plot.caption = element_text(color = "gray55", face = "bold", size = 12), legend.text = element_text(size = 17.3), 
-axis.title = element_text(size = 17.8, face = "bold", color = "gray25"), legend.title = element_text(size = 17.3), 
-axis.line = element_line(size = 0.45), plot.title = element_text(size = 22.1), plot.subtitle = element_text(size = 17.8), 
-strip.text = element_text(size = 17.3, face = "bold"))
+theme_custom <- theme(
+  legend.position = "bottom", legend.direction = "horizontal", axis.text = element_text(size = 17.8),
+  plot.caption = element_text(color = "gray55", face = "bold", size = 12), legend.text = element_text(size = 17.3),
+  axis.title = element_text(size = 17.8, face = "bold", color = "gray25"), legend.title = element_text(size = 17.3),
+  axis.line = element_line(size = 0.45), plot.title = element_text(size = 22.1), plot.subtitle = element_text(size = 17.8),
+  strip.text = element_text(size = 17.3, face = "bold")
+)
 ```
 
 
 Import data
-```{r}
-medals <- read_excel(here("data", "medals.xlsx")) %>% 
-  clean_names() %>% 
-  mutate(team_noc = factor(team_noc),
-         across(where(is.character), as.numeric))
+```{r, echo=FALSE}
+medals <- read_excel(here("data", "medals.xlsx")) %>%
+  clean_names() %>%
+  mutate(
+    team_noc = factor(team_noc),
+    across(where(is.character), as.numeric)
+  )
 
-athletes <- 
-  read_excel(here("data", "athletes.xlsx")) %>% 
+athletes <-
+  read_excel(here("data", "athletes.xlsx")) %>%
   clean_names()
 
-coaches <- 
-  read_excel(here("data", "coaches.xlsx")) %>% 
+coaches <-
+  read_excel(here("data", "coaches.xlsx")) %>%
   clean_names()
 
-gender <- 
-  read_excel(here("data", "entriesgender.xlsx")) %>% 
+gender <-
+  read_excel(here("data", "entriesgender.xlsx")) %>%
   clean_names()
 
-teams <- 
-  read_excel(here("data", "teams.xlsx")) %>% 
+teams <-
+  read_excel(here("data", "teams.xlsx")) %>%
   clean_names()
 
-pop_country <- 
-  read_csv(here("data", "population_by_country_2020.csv")) %>% 
+pop_country <-
+  read_csv(here("data", "population_by_country_2020.csv")) %>%
   clean_names()
 
-athlete_events <- 
-  read_csv(here("data", "athlete_events.csv")) %>% 
+athlete_events <-
+  read_csv(here("data", "athlete_events.csv")) %>%
   clean_names()
 
-noc_regions <- 
-  read_csv(here("data", "noc_regions.csv")) %>% 
+noc_regions <-
+  read_csv(here("data", "noc_regions.csv")) %>%
   clean_names()
 
-tokyoo_2021 <- 
-  read_csv(here("data", "Tokyo 2021 dataset.csv")) %>% 
+tokyoo_2021 <-
+  read_csv(here("data", "Tokyo 2021 dataset.csv")) %>%
   clean_names()
+
+# TODO list datasets in clever way
 ```
 
-Medals awarded per nation
-```{r}
-medals_30 <- 
-  medals%>%
+Total medals per country
+```{r, fig.width = 18, fig.height = 25}
+medals_30 <-
+  medals %>%
   mutate(
     team_noc = fct_reorder(team_noc, total)
   ) %>%
   slice_max(team_noc, n = 30)
 
-medals_30 %>% 
+medals_30 %>%
   ggplot(aes(team_noc, total)) +
   geom_segment(aes(x = team_noc, xend = team_noc, y = 0, yend = total)) +
   geom_point(aes(team_noc, total),
-             color = if_else(medals_30$team_noc == "Denmark", "red", "grey50"),
-             size = if_else(medals_30$team_noc == "Denmark", 10, 5)) +
+    color = if_else(medals_30$team_noc == "Denmark", "red", "grey50"),
+    size = if_else(medals_30$team_noc == "Denmark", 10, 5)
+  ) +
   geom_text(aes(team_noc, total, label = if_else(team_noc == "Denmark", total, NULL)), color = "white") +
   coord_flip() +
-  labs(y = NULL,
-       x = NULL,
-       title = "Toal olympic medals by country: Tokyo 2021",
-       subtitle = "Denmark is highlighted") +
+  labs(
+    y = NULL,
+    x = NULL,
+    title = "Toal olympic medals by country: Tokyo 2021",
+    subtitle = "With 11 medals total, Denmark reached their of 8-10 medals"
+  ) +
+  annotate("text", x = 12, y = 70, label = "The medal race is topped by the usual suspects, USA and China") +
   theme_fivethirtyeight() +
-  theme_custom 
-  
+  theme_custom
 ```
 
+Detailed overview in table
+```{r}
+medals %>% 
+  datatable() %>% 
+  formatStyle(columns = "gold", 
+              backgroundColor = "gold") %>% 
+  formatStyle("silver", backgroundColor = "silver") %>% 
+  formatStyle("bronze", backgroundColor = "orange")       # TODO highlight Denmark in table
+```
+
+Pie chart of top 10 countries
+```{r}
 
 
-
-
-
-
-
-
+```
