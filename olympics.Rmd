@@ -92,10 +92,13 @@ medals_30 <-
 
 medals_30 %>%
   ggplot(aes(team_noc, total)) +
-  geom_segment(aes(x = team_noc, xend = team_noc, y = 0, yend = total)) +
+  geom_segment(aes(x = team_noc, xend = team_noc, y = 0, yend = total),
+    color = if_else(medals_30$team_noc == "Denmark", "orange", "grey70"),
+    size = 1.2, color = "grey70"
+  ) +
   geom_point(aes(team_noc, total),
-    color = if_else(medals_30$team_noc == "Denmark", "red", "grey50"),
-    size = if_else(medals_30$team_noc == "Denmark", 10, 5)
+    color = if_else(medals_30$team_noc == "Denmark", "orange", "grey70"),
+    size = if_else(medals_30$team_noc == "Denmark", 7, 3)
   ) +
   geom_text(aes(team_noc, total, label = if_else(team_noc == "Denmark", total, NULL)), color = "white") +
   coord_flip() +
@@ -103,25 +106,38 @@ medals_30 %>%
     y = NULL,
     x = NULL,
     title = "Toal olympic medals by country: Tokyo 2021",
-    subtitle = "With 11 medals total, Denmark reached their of 8-10 medals"
+    subtitle = "The medal race is topped by the usual suspects, USA and China"
   ) +
-  annotate("text", x = 12, y = 70, label = "The medal race is topped by the usual suspects, USA and China") +
+  annotate("text", x = 8, y = 40, label = "With 11 medals total,\nDenmark reached their goal of 8-10 medals", fontface = "bold") +
+  annotate(
+    geom = "curve", x = 9, y = 30, xend = 8, yend = 13,
+    curvature = .2, arrow = arrow(length = unit(2, "mm"))
+  ) +
   theme_fivethirtyeight() +
   theme_custom
 ```
 
 Detailed overview in table
 ```{r}
-medals %>% 
-  datatable() %>% 
-  formatStyle(columns = "gold", 
-              backgroundColor = "gold") %>% 
-  formatStyle("silver", backgroundColor = "silver") %>% 
-  formatStyle("bronze", backgroundColor = "orange")       # TODO highlight Denmark in table
+medals %>%
+  datatable() %>%
+  formatStyle(
+    columns = "gold",
+    backgroundColor = "gold"
+  ) %>%
+  formatStyle("silver", backgroundColor = "silver") %>%
+  formatStyle("bronze", backgroundColor = "orange") 
 ```
 
-Pie chart of top 10 countries
+Plot of top 10 total medals per countries per capita compared to top 10 total medals countries.
 ```{r}
-
-
+population %>% 
+  filter(year == 2013) %>% 
+  left_join(medals %>% 
+              rename(country = team_noc), by = "country") %>% 
+  drop_na() %>% 
+  mutate(medals_per_capita = total / population * 100000) %>% 
+  top_n(10, wt = medals_per_capita)
+  ggplot(aes(medals_per_capita, fill = country)) +
+  geom_bar() 
 ```
