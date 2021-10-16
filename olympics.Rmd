@@ -126,18 +126,32 @@ medals %>%
     backgroundColor = "gold"
   ) %>%
   formatStyle("silver", backgroundColor = "silver") %>%
-  formatStyle("bronze", backgroundColor = "orange") 
+  formatStyle("bronze", backgroundColor = "orange")
 ```
 
-Plot of top 10 total medals per countries per capita compared to top 10 total medals countries.
+Plot of top 10 total medals per countries compared to top 10 total medals countries per capita. Maybe a circular barplot?
 ```{r}
-population %>% 
-  filter(year == 2013) %>% 
-  left_join(medals %>% 
-              rename(country = team_noc), by = "country") %>% 
-  drop_na() %>% 
-  mutate(medals_per_capita = total / population * 100000) %>% 
-  top_n(10, wt = medals_per_capita)
-  ggplot(aes(medals_per_capita, fill = country)) +
-  geom_bar() 
+population %>% # TODO overvej også at smide Danmark ind i plottet
+  filter(year == 2013) %>%
+  left_join(medals %>%
+    rename(country = team_noc), by = "country") %>%
+  drop_na() %>%
+  mutate(medals_per_capita = total / population * 100000) %>%
+  slice_max(medals_per_capita, n = 10) %>%
+  bind_rows(
+    population %>%
+      filter(year == 2013) %>%
+      left_join(medals %>%
+        rename(country = team_noc) %>%
+        mutate(
+          country = str_replace_all(country, c(
+            "ROC" = "Russia",
+            "Great Britain" = "United Kingdom of Great Britain and Northern Ireland",
+            "People's Republic of China" = "China"
+          ))
+        ), by = "country") %>%
+      drop_na() %>%
+      mutate(medals_per_capita = total / population * 100000) %>%
+      slice_min(rank_by_total, n = 10)
+  ) %>% arrange(desc(medals_per_capita))
 ```
