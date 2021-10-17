@@ -3,8 +3,11 @@ title: "2021 olympics"
 author: "Esben Lykke Skovgaard"
 date: "25/9/2021"
 output:
-    html_document:
-      theme: cosmo
+  html_document:
+    theme:
+      bootswatch: minty
+    keep_md: TRUE
+knit: pagedown::chrome_print
 ---
 
 ```{r setup, include=FALSE}
@@ -130,7 +133,7 @@ medals %>%
 ```
 
 Plot of top 10 total medals per countries compared to top 10 total medals countries per capita. Maybe a circular barplot?
-```{r}
+```{r, fig.width = 18, fig.height = 18}
 population %>%
   filter(year == 2013) %>%
   left_join(medals %>%
