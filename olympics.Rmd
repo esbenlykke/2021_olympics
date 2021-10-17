@@ -131,12 +131,15 @@ medals %>%
 
 Plot of top 10 total medals per countries compared to top 10 total medals countries per capita. Maybe a circular barplot?
 ```{r}
-population %>% # TODO overvej også at smide Danmark ind i plottet
+population %>%
   filter(year == 2013) %>%
   left_join(medals %>%
     rename(country = team_noc), by = "country") %>%
   drop_na() %>%
-  mutate(medals_per_capita = total / population * 100000) %>%
+  mutate(
+    medals_per_capita = (total / population) * 1e8,
+    group = factor("Most medals per capita top 10")
+  ) %>%
   slice_max(medals_per_capita, n = 10) %>%
   bind_rows(
     population %>%
@@ -151,7 +154,23 @@ population %>% # TODO overvej også at smide Danmark ind i plottet
           ))
         ), by = "country") %>%
       drop_na() %>%
-      mutate(medals_per_capita = total / population * 100000) %>%
+      mutate(
+        medals_per_capita = (total / population) * 1e8,
+        group = factor("Medals total top 10 countries")
+      ) %>%
       slice_min(rank_by_total, n = 10)
-  ) %>% arrange(desc(medals_per_capita))
+  ) %>%
+  group_by(group) %>% 
+  mutate(country = fct_reorder(country, medals_per_capita)) %>% 
+  ggplot(aes(country, medals_per_capita, fill = group)) +
+  geom_col(position = "dodge", color = "black", alpha = .5) + 
+  coord_polar() + 
+  theme_fivethirtyeight() +
+  scale_fill_tableau(palette = "Jewel Bright") +
+  scale_y_log10() +
+  labs(fill = NULL,
+       title = "Medal per capita",
+       subtitle = "Comparison between the top 10 countries based on total medals and top 10 countries based on most medals per capita")
+
+# TODO overvej også at smide Danmark ind i plottet
 ```
