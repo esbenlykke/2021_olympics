@@ -27,7 +27,8 @@ p_load(
   readxl,
   hrbrthemes,
   ggthemes,
-  DT
+  DT,
+  ggtext
 )
 
 theme_custom <- theme(
@@ -134,46 +135,52 @@ medals %>%
 
 Plot of top 10 total medals per countries compared to top 10 total medals countries per capita. Maybe a circular barplot?
 ```{r, fig.width = 18, fig.height = 18}
+# country_rank <-
 population %>%
   filter(year == 2013) %>%
   left_join(medals %>%
-    rename(country = team_noc), by = "country") %>%
+    rename(country = team_noc) %>%
+    mutate(
+      country = str_replace_all(country, c(
+        "ROC" = "Russia",
+        "Great Britain" = "United Kingdom of Great Britain and Northern Ireland",
+        "People's Republic of China" = "China"
+      )), by = "country"
+    )) %>%
   drop_na() %>%
   mutate(
     medals_per_capita = (total / population) * 1e8,
-    group = factor("Most medals per capita top 10")
-  ) %>%
-  slice_max(medals_per_capita, n = 10) %>%
-  bind_rows(
-    population %>%
-      filter(year == 2013) %>%
-      left_join(medals %>%
-        rename(country = team_noc) %>%
-        mutate(
-          country = str_replace_all(country, c(
-            "ROC" = "Russia",
-            "Great Britain" = "United Kingdom of Great Britain and Northern Ireland",
-            "People's Republic of China" = "China"
-          ))
-        ), by = "country") %>%
-      drop_na() %>%
-      mutate(
-        medals_per_capita = (total / population) * 1e8,
-        group = factor("Medals total top 10 countries")
-      ) %>%
-      slice_min(rank_by_total, n = 10)
-  ) %>%
-  group_by(group) %>% 
-  mutate(country = fct_reorder(country, medals_per_capita)) %>% 
-  ggplot(aes(country, medals_per_capita, fill = group)) +
-  geom_col(position = "dodge", color = "black", alpha = .5) + 
-  coord_polar() + 
-  theme_fivethirtyeight() +
-  scale_fill_tableau(palette = "Jewel Bright") +
-  scale_y_log10() +
-  labs(fill = NULL,
-       title = "Medal per capita",
-       subtitle = "Comparison between the top 10 countries based on total medals and top 10 countries based on most medals per capita")
+    rank_mpc = dense_rank(desc(medals_per_capita)),
+    name_rank = str_c(country, rank_mpc, sep = " ")
+  )
 
-# TODO overvej også at smide Danmark ind i plottet
+
+country_rank %>%
+  slice_min(rank_by_total, n = 10) %>%
+  mutate(group = factor("Most medals total top 10")) %>%
+  bind_rows(country_rank %>%
+    slice_max(medals_per_capita, n = 10) %>%
+    mutate(group = "Most medal per capita top 10")) %>%
+  bind_rows(country_rank %>%
+    filter(country == "Denmark") %>%
+    mutate(group = "Denmark")) %>%
+  group_by(group) %>%
+  mutate(country = fct_reorder(country, medals_per_capita)) %>%
+  ggplot(aes(country, medals_per_capita, fill = group)) +
+  geom_col(position = "dodge", color = "black", alpha = .5) +
+  # geom_richtext(aes(country, medals_per_capita - 10, label = name_rank), angle = 90) +
+  coord_polar() +
+  theme_fivethirtyeight() +
+  scale_fill_manual(
+    values = c("#E22800", "#008000", "#00FFFF"),
+  ) +
+  scale_y_log10() +
+  labs(
+    fill = NULL,
+    title = "Medals per 100 mio. capita",
+    subtitle = "Comparison between the top 10 countries based on total\nmedals and top 10 countries based on most medals per capita"
+  ) +
+  theme(axis.text.x = element_blank())
+
+# TODO fix circular angles on country name and rank.
 ```
