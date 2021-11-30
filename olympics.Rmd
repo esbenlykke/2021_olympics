@@ -6,8 +6,10 @@ output:
   html_document:
     code_folding: hide
     theme:
-      bootswatch: flatly
+      bootswatch: darkly
     keep_md: TRUE
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup}
@@ -28,25 +30,20 @@ p_load(
   here,
   janitor,
   readxl,
-  hrbrthemes,
   ggthemes,
   DT,
   scales,
-  ggtext
+  ggtext,
+  gganimate,
+  lubridate
 )
 ```
 
-
 ### Import data
-It will be a challenge to make use of all the different datasets throughout the different visualizations.
-```{r import data}
-medals <- read_excel(here("data", "medals.xlsx")) %>%
-  clean_names() %>%
-  mutate(
-    team_noc = factor(team_noc),
-    across(where(is.character), as.numeric)
-  )
 
+It will be a challenge to make use of all the different datasets throughout the different visualizations.
+
+```{r import data}
 athletes <-
   read_excel(here("data", "athletes.xlsx")) %>%
   clean_names()
@@ -63,10 +60,6 @@ teams <-
   read_excel(here("data", "teams.xlsx")) %>%
   clean_names()
 
-pop_country <-
-  read_csv(here("data", "population_by_country_2020.csv")) %>%
-  clean_names()
-
 athlete_events <-
   read_csv(here("data", "athlete_events.csv")) %>%
   clean_names()
@@ -75,24 +68,30 @@ noc_regions <-
   read_csv(here("data", "noc_regions.csv")) %>%
   clean_names()
 
-tokyoo_2021 <-
+medals <-
   read_csv(here("data", "Tokyo 2021 dataset.csv")) %>%
-  clean_names()
+  clean_names() %>%
+  mutate(
+    across(where(is.character), factor)
+  )
 ```
 
 ### Detailed overview in table
+
 Nothing special here, just all medals information presented in a neat table.
+
 ```{r table}
 medals %>%
   datatable() %>%
-  formatStyle("gold", backgroundColor = "gold") %>%
-  formatStyle("silver", backgroundColor = "silver") %>%
-  formatStyle("bronze", backgroundColor = "orange")
+  formatStyle("gold_medal", backgroundColor = "gold") %>%
+  formatStyle("silver_medal", backgroundColor = "silver") %>%
+  formatStyle("bronze_medal", backgroundColor = "orange")
 ```
 
 ### Total medals per country
-Lets start with a common way to plot a continous variable against a categorical variable, the bar plot. 
-I will try to make an emphasis on Denmark throuhgout the plots, just because. :)
+
+Lets start with a common way to plot a continous variable against a categorical variable, the bar plot. I will try to make an emphasis on Denmark throuhgout the plots, just because. :)
+
 ```{r total medals plot}
 medals_30 <-
   medals %>%
@@ -128,7 +127,9 @@ medals_30 %>%
 ```
 
 ### Total medals per per capita
+
 This shit got pretty complicated. I'm sure, there is a much easier and faster way to do this. Nevertheless, I'm pretty happy with the result so far.
+
 ```{r circular plot}
 country_rank <-
   population %>%
@@ -137,8 +138,8 @@ country_rank <-
     rename(country = team_noc) %>%
     mutate(
       country = str_replace_all(country, c(
-        "ROC" = "Russian Federation",
-        "Great Britain" = "United Kingdom of Great Britain and Northern Ireland",
+        "ROC" = "Russia",
+        "Great Britain" = "United Kingdom",
         "People's Republic of China" = "China"
       ))
     )) %>%
@@ -276,4 +277,40 @@ country_rank %>%
     plot.title = element_text(hjust = .5, size = 20, face = "bold", color = "grey25"),
     axis.title.y = element_text(color = "grey25", hjust = .7)
   )
+```
+
+### Create animated plot
+Let's try do do an animated plot of cumulative medals for each country throughout
+the modern era of the Olympics. 
+
+```{r}
+athlete_events %>%
+  replace_na(list(medal = "None")) %>%
+  arrange(year) %>%
+  group_by(team) %>%
+  mutate(
+    gold_int = if_else(medal == "Gold", 1, 0),
+    gold_cumsum = cumsum(gold_int),
+    silver_int = if_else(medal == "Silver", 1, 0),
+    silver_cumsum = cumsum(silver_int),
+    bronze_int = if_else(medal == "Bronze", 1, 0),
+    bronze_cumsum = cumsum(bronze_int),
+    medal_total_int = if_else(medal %in% c("Gold", "Silver", "Bronze"), 1, 0),
+    medal_total_cumsum = cumsum(medal_total_int)
+  ) %>%
+  ungroup() %>%
+  head(100) %>%
+  ggplot(aes(team, medal_total_cumsum, fill = team)) +
+  geom_bar(stat = "identity") +
+  transition_reveal(year) 
+  # labs(title = "Year: {frame_time}", x = "Country", y = "Total number of medals")
+```
+
+### Create plot that highlights certain data using with_blur() from "ggfx" and geom_mark_ellipse() from "ggforce" 
+```{r}
+athlete_events %>% 
+  transmute(year = (year))
+
+athlete_events %>% 
+  select(year)
 ```
